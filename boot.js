@@ -1120,6 +1120,10 @@ success: true
       // Start observing the target node for configured mutations
       observer.observe(targetNode, config);
 
+      // For our first time in, we'll trigger off an artificial change just to make sure
+      // we don't miss the initial load of the page as a change event
+      callback();
+
     },
 
     // This is called after our DOM change event thinks we had a change, but it's called
@@ -1253,7 +1257,7 @@ console.log("Plugin - Now checking app store for installed plugins for this user
 // Load all of the plugins 
 function loadAllPlugins(plugins) {
   zw.shim.onLoad();
-  console.log("Loading Plugin scripts");
+  console.log("Plugin - Loading scripts for # of plugins:", plugins.length);
 
   // Manual override of bot list
   /*
@@ -1268,8 +1272,25 @@ function loadAllPlugins(plugins) {
   }]
   */
 
+  // See if there are overrides of plugin locations from the global
+  // This is used by developers who are doing local dev and want to override
+  // the main public repo with their local one
+  var pluginOverrideIds = {};
+  if ('pluginOverrides' in window && window.pluginOverrides && window.pluginOverrides.length > 0) {
+    console.log("Plugin - It appears you want to override some of the plugin jsUrl's.", window.pluginOverrides);
+    for (let index = 0; index < window.pluginOverrides.length; index++) {
+      const element = window.pluginOverrides[index];
+      if (element.active) {
+        pluginOverrideIds[element.id] = element.jsUrl;
+        console.log("Plugin - Override ID:", element.id, "to jsUrl:", pluginOverrideIds[element.id]);
+      } else {
+        console.log("Plugin - Override ID:", element.id, "looks like this is inactive for now");
+      }
+    }
+  }
+
   plugins.forEach(function (plugin) {
-    console.log(plugin);
+    console.log("Plugin:", plugin);
     if (plugin && plugin.urls && plugin.urls.jsUrl) {
 
       /* // Approach for pastebin
@@ -1281,14 +1302,47 @@ function loadAllPlugins(plugins) {
       console.log("Plugin Loaded - ", bot.metadata.name);
       */
 
+      // See if they wanted to override the plugin to be a local/alternate url
+      if (plugin.id in pluginOverrideIds) {
+        // yes, they want to override
+        console.log("Plugin - Want override on this plugin. new jsUrl:", pluginOverrideIds[plugin.id], "old url:", plugin.urls.jsUrl);
+        plugin.urls.jsUrl = pluginOverrideIds[plugin.id];
+        plugin.isOverride = true;
+      }
 
       // cache buster
       let ts = new Date().getTime();
       let url = "";
-      url = "https://i2dcui.appspot.com/slingshot?url=";
-      url += plugin.urls.jsUrl;
-      url += "&ts=" + ts;
+      // if (plugin.isOverride) {
+
+        // just use exactly the url they give us, i.e. no slingshot or timestamp buster
+        // see if localhost
+        if (plugin.urls.jsUrl.match(/^http:\/\/localhost/)) {
+          // yes, is localhost, so cachebust and no slingshot
+          console.log("Plugin - This is localhost url so adding cachebust timestamp");
+          url += plugin.urls.jsUrl;
+          url += "?ts=" + ts; // actually, yes, append timestamp as cachebuster
+        } else if (plugin.urls.jsUrl.match(/raw.githubusercontent/)) {
+          // it is raw github, so they don't put correct meta tag around it, thus slingshot it
+          // and add timestamp so cachebust
+          console.log("Plugin - This is from github, so slingshotting to remap content-type.")
+          url = "https://i2dcui.appspot.com/slingshot?url=";
+          url += plugin.urls.jsUrl;
+          url += "&ts=" + ts;  
+        } else {
+          console.log("Plugin - Not modifying url.");
+        }
+
+      // } else {
+      //   // this is not an overriden url, which means it's public, which means
+      //   // we want to load it via our slingshot url and append a timestamp to do cache busting
+      //   url = "https://i2dcui.appspot.com/slingshot?url=";
+      //   url += plugin.urls.jsUrl;
+      //   url += "&ts=" + ts;
+      // }
+
       console.log("Plugin - Url being retrieved:", url);
+
       // ajax retrieve the document
       $.ajax({
         type: "GET",
@@ -1321,17 +1375,19 @@ function loadAllPlugins(plugins) {
 // Check for existence of jquery
 // setInterval() watch for $ not being null
 var interval = setInterval(function () {
-  console.log("Loop", typeof ($));
+  // console.log("Loop", typeof ($));
   if ($) {
     clearInterval(interval);
 
     //loadAllPlugins();
 
+    // var urlForPluginList = "http://138.68.37.35:8080/function/whipper/line/" + zw.getLine();
+    var urlForPluginList = "https://plugins.zw.wagar.cc/line/" + zw.getLine();
+    console.log("Plugin - App store url:", urlForPluginList);
 
     $.ajax({
       type: "GET",
-      url: "http://138.68.37.35:8080/function/whipper/line/" + zw.getLine(),
-      // url: "https://plugins.zw.wagar.cc/line/" + zw.getLine(),
+      url: urlForPluginList,
       success: function (data) {
         console.log("data:", data);
         if (data && 'plugins' in data) {
