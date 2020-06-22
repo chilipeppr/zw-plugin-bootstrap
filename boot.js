@@ -259,6 +259,7 @@ id: 31324856907
       //CONVERSATION_LIST_CHANGE: "conversation_list_change",
       CONVERSATION_LIST_ITEM_LOAD: "conversation_list_item_load",
       CONVERSATION_LIST_ITEM_MENU_LOAD: "conversation_list_item_menu_load", // the ellipsis menu
+      MESSAGE_LOAD: "message_load" // New message
     },
 
     // A plugin calls this to add an event listener
@@ -290,6 +291,11 @@ id: 31324856907
           console.log("adding CONVERSATION_LIST_ITEM_MENU_LOAD callback listener");
           zw.plugin.callbacks[zw.plugin.events.CONVERSATION_LIST_ITEM_MENU_LOAD].push(callback);
           break;
+        case zw.plugin.events.MESSAGE_LOAD:
+          // Add to our array for callbacks
+          console.log("adding MESSAGE_LOAD callback listener");
+          zw.plugin.callbacks[zw.plugin.events.MESSAGE_LOAD].push(callback);
+          break;
         default:
           console.log("You called addEventListener with an event name that does not exist.");
 
@@ -306,6 +312,7 @@ id: 31324856907
       control_panel_load: [],
       conversation_list_item_load: [],
       conversation_list_item_menu_load: [],
+      message_load: []
     },
 
     // Calls all the callbacks for a listener
@@ -1239,6 +1246,37 @@ success: true
         //console.log("setting last selected conversation to null");
         zw.shim.lastConvSelPhone = null;
       }
+
+
+      // 4th SHIM EVENT
+      // 4th, we'll check for new inbound and outbound message bubbles
+
+      // Collect inbound and outbound messages
+      var messagesEl = $('.message-bubble_bubbleStyle');
+
+      for (var msg in messagesEl) {
+        let msgEl = $(msg);
+
+        if (msgEl.attr('event-triggered')) {
+          // Event already triggered, skipping
+        } else {
+          // Prevent reprocessing events
+          msgEl.attr('event-triggered', true);
+
+          // Setup event payload
+          var evt = {
+            // TODO find messageId
+            // messageId: 0,
+            body: msgEl.text(),
+            inbound: msgEl.hasClass('.message-bubble_incomingBubbleStyle')
+          };
+
+          // Trigger event
+          zw.plugin.callEventListeners(zw.plugin.events.MESSAGE_LOAD, evt);
+        }
+      }
+        
+        
 
     },
 
