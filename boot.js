@@ -1267,7 +1267,7 @@ success: true
           var evt = {
             // TODO find messageId
             // messageId: 0,
-            payload: msgEl.text(),
+            body: msgEl.text(),
             inbound: msgEl.hasClass('.message-bubble_incomingBubbleStyle')
           };
 
