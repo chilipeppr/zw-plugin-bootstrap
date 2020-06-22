@@ -1274,6 +1274,8 @@ success: true
           // Trigger event
           zw.plugin.callEventListeners(zw.plugin.events.MESSAGE_LOAD, evt);
         }
+      }
+        
         
 
     },
