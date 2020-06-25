@@ -1252,16 +1252,20 @@ success: true
       // 4th, we'll check for new inbound and outbound message bubbles
 
       // Collect inbound and outbound messages
-      var messagesEl = $('.message-bubble_bubbleStyle');
+      var messagesEl = $('div.message-bubble_bubbleStyle');
+      // console.log("messagesEl:", messagesEl);
 
-      for (var msg in messagesEl) {
-        let msgEl = $(msg);
+      //for (var msg in messagesEl) {
+      messagesEl.each(function() {
+        let msgEl = $(this);
 
-        if (msgEl.attr('event-triggered')) {
+        // console.log("msgEl.length:", msgEl.length, msgEl);
+
+        if (msgEl.attr('data-event-triggered') == "yes") {
           // Event already triggered, skipping
         } else {
           // Prevent reprocessing events
-          msgEl.attr('event-triggered', true);
+          msgEl.attr('data-event-triggered', "yes");
 
           // Setup event payload
           var evt = {
@@ -1274,7 +1278,7 @@ success: true
           // Trigger event
           zw.plugin.callEventListeners(zw.plugin.events.MESSAGE_LOAD, evt);
         }
-      }
+      });
         
         
 
@@ -1419,6 +1423,7 @@ var interval = setInterval(function () {
 
     //loadAllPlugins();
 
+    // http://138.68.37.35:8080/function/whipper/
     // var urlForPluginList = "http://138.68.37.35:8080/function/whipper/line/" + zw.getLine();
     var urlForPluginList = "https://plugins.zw.wagar.cc/line/" + zw.getLine();
     console.log("Plugin - App store url:", urlForPluginList);
