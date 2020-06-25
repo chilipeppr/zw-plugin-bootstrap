@@ -13,14 +13,14 @@ window.pluginOverrides = [
     {
         // New Text Shortcut Key
         id: "d7bd26ff-69b4-4b58-b228-475f5a00b5fd", // id from app store
-        active: true, // set to false to stop overriding, true to override
+        active: false, // set to false to stop overriding, true to override
         //jsUrl: "https://raw.githubusercontent.com/chilipeppr/ZwNewTextShortcutKey/master/plugin.js", // John's version in Github
         jsUrl: "http://localhost:8080/ZwNewTextShortcutKey/plugin.js", // Local dev version
     },
     {
         // ABC Plugin
         id: "10ea0309-a455-450d-8bba-a435bd147c6b", // id from app store
-        active: true, // set to false to stop overriding, true to override
+        active: false, // set to false to stop overriding, true to override
         //jsUrl: "https://raw.githubusercontent.com/chilipeppr/zw-plugin-abc/master/pluginAbc.js", // John's version in Github
         //jsUrl: "https://raw.githubusercontent.com/dfreddolino/zw-plugin-abc/master/pluginAbc.js", // David's version in Github
         jsUrl: "http://localhost:8080/zw-plugin-abc/pluginAbc.js", // Local dev version
@@ -29,7 +29,7 @@ window.pluginOverrides = [
     {
         // Human Date Time
         id: "dd33675d-24d5-4b8e-93db-0376a47d1834", // id from app store
-        active: true, // set to false to stop overriding, true to override
+        active: false, // set to false to stop overriding, true to override
         //jsUrl: "https://raw.githubusercontent.com/chilipeppr/ZwHumanDate/master/plugin.js", // John's version in Github
         jsUrl: "http://localhost:8080/ZwHumanDate/plugin.js", // Local dev version
     },
